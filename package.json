@@ -1,0 +1,43 @@
+{
+  "name": "root",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GetStream/stream-chat-react-native.git"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^12.1.4",
+    "@commitlint/config-conventional": "^12.1.4",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "dotenv": "^10.0.0",
+    "execa": "^5.1.1",
+    "husky": "^6.0.0",
+    "lerna": "^4.0.0",
+    "prettier": "^3.5.1",
+    "semantic-release": "^25.0.2",
+    "uglify-js": "^3.19.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "dotgit/hooks/pre-commit-format.sh && dotgit/hooks/pre-commit-reject-binaries.py",
+      "commit-msg": "npx commitlint --edit $1"
+    }
+  },
+  "scripts": {
+    "lerna-workspaces": "lerna",
+    "release": "yarn lerna-workspaces run release",
+    "release-next": "yarn lerna-workspaces run release-next",
+    "extract-changelog": "rm -rf NEXT_RELEASE_CHANGELOG.md && yarn lerna-workspaces run extract-changelog",
+    "bootstrap": "yarn lerna-workspaces run bootstrap",
+    "eslint": "yarn lerna-workspaces run eslint",
+    "lint": "yarn lerna-workspaces run lint",
+    "lint-fix": "yarn lerna-workspaces run lint-fix",
+    "build": "yarn lerna-workspaces run build",
+    "test:coverage": "yarn lerna-workspaces run test:coverage",
+    "test:unit": "yarn lerna-workspaces run test:unit",
+    "minify-bundle": "uglifyjs package/lib/module/**/*.js -o package/lib/module/bundle.min.js -c -m"
+  },
+  "packageManager": "yarn@1.22.22"
+}

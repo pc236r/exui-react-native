@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+#      - develop
+
+permissions:
+  id-token: write # for OIDC / npm provenance if you use it
+  actions: write # if you dispatch other workflows
+  contents: write # commits / tags / merge-back
+
+jobs:
+  publish:
+    runs-on: public
+    strategy:
+      matrix:
+        node-version: [24.x]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+
+      - name: Fetch tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Prepare git
+        run: |
+          git config --global user.name 'stream-ci-bot'
+          git config --global user.email 'stream-bot@getstream.io'
+
+      - name: Install && Build - SDK and Sample App
+        uses: ./.github/actions/install-and-build-sdk
+
+      - name: Lint
+        run: yarn lerna-workspaces run lint
+
+      - name: Test
+        if: github.ref == 'refs/heads/develop'
+        run: yarn test:coverage
+
+      - name: Publish Next Release (develop)
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          GITHUB_SHORT_SHA="$(git rev-parse --short $GITHUB_SHA)" yarn release-next
+
+      - name: Publish Release (main)
+        if: github.ref == 'refs/heads/main'
+        run: yarn release
+
+      - name: Merge back changes (main -> develop)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git stash
+          git checkout develop
+          git pull origin develop
+          git merge main -m "chore: merge back release [skip ci]"
+          git push origin develop

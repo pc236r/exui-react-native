@@ -16,14 +16,19 @@ jobs:
       with:
         node-version: '18'
     
-    - name: Install dependencies
+    - name: Install dependencies (skip native sync)
       run: |
         cd examples/ExpoMessaging
-        yarn install
+        # 跳过prestart脚本中的sync-native
+        yarn install --ignore-scripts
+    
+    - name: Install Expo CLI
+      run: npm install -g expo-cli
     
     - name: Publish to Expo
       env:
         EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
       run: |
         cd examples/ExpoMessaging
+        # 直接运行expo publish，跳过prestart
         npx expo publish --non-interactive

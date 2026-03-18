@@ -1,0 +1,41 @@
+name: Minimal Static Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Create minimal page
+      run: |
+        mkdir -p docs
+        cat > docs/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head><title>ExpoMessaging Ready!</title></head>
+        <body>
+          <h1>ExpoMessaging React Native 项目</h1>
+          <p>项目已准备好！在手机上查看：</p>
+          <ol>
+            <li>git clone https://github.com/pc236r/exui-react-native.git</li>
+            <li>cd exui-react-native/examples/ExpoMessaging</li>
+            <li>yarn install</li>
+            <li>npx expo start</li>
+            <li>在Expo Go中扫描二维码</li>
+          </ol>
+        </body>
+        </html>
+        EOF
+    
+    - name: Deploy to docs folder
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
+        git add docs/
+        git commit -m 'Deploy to docs' || echo 'No changes'
+        git push origin main
